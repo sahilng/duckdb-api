@@ -4,3 +4,6 @@ __pycache__/
 .DS_Store
 *.pyc
 *.db
+*.duckdb
+*.ducklake
+*.ducklake.files

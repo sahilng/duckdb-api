@@ -132,7 +132,7 @@ Content-Type: application/json
    ```
 3. **Run** the container, **mounting** your `.db` files as volumes:  
    ```bash
-   docker run -d      -p 8000:8000      --env-file .env      -v "$(pwd)/test.db:/app/test.db"      -v "$(pwd)/test3.db:/app/test3.db"      -v "$(pwd)/test4.db:/app/test4.db"      -v "$(pwd)/tpch.db:/app/tpch.db"      --name duckdb-api      duckdb-api
+   docker run -d      -p 8000:8000      --env-file .env      -v "$(pwd)/test.db:/app/test.db"      --name duckdb-api      duckdb-api
    ```
 4. **Verify**  
    ```bash

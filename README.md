@@ -34,6 +34,8 @@ Shell variables take precedence over values in `.env`.
 If an `init.sql` file is present at the project root, it will be executed once when the server starts.  
 Use this to maintain any `ATTACH` statements for `.db`, `.duckdb`, or `.ducklake` files, as well as to run any other initialization DDL/DML.
 
+Please note that these SQL statements will be executed in a read-only connection and therefore cannot create or modify data.
+
 Example `init.sql`:
 
 ```sql

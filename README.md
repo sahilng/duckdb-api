@@ -6,6 +6,7 @@ A simple SQL API backed by DuckDB.
 
 ```
 ├── app.py             # Flask API server
+├── init.sql           # Optional SQL script run at startup
 ├── requirements.txt   # Python dependencies
 ├── Dockerfile         # Build instructions for API container
 ├── .gitignore
@@ -28,12 +29,24 @@ This application uses the following environment variables. You can set them in y
 
 Shell variables take precedence over values in `.env`.
 
-## Database Files
+## init.sql
 
-Place all your DuckDB `.db` files in the project root (next to `app.py`).
+If an `init.sql` file is present at the project root, it will be executed once when the server starts.  
+Use this to maintain any `ATTACH` statements for `.db`, `.duckdb`, or `.ducklake` files, as well as to run any other initialization DDL/DML.
 
-- The primary DB file is defined by `DB_FILE` (default `test.db`).  
-- All other `*.db` files are automatically attached under the alias given by their filename (minus `.db`).
+Example `init.sql`:
+
+```sql
+-- Install and load DuckLake extension if needed
+INSTALL ducklake;
+LOAD ducklake;
+
+-- Attach additional databases under desired aliases
+ATTACH 'analytics.db' AS analytics;
+ATTACH 'users.duckdb' AS users;
+ATTACH 'ducklake:metadata.ducklake' AS metadata;
+USE metadata;
+```
 
 ## Local Development
 
@@ -52,13 +65,13 @@ Place all your DuckDB `.db` files in the project root (next to `app.py`).
    pip install --upgrade pip
    pip install -r requirements.txt
    ```
-4. **Configure your API key**  
-   - **Option A**: Create a `.env` file:  
+4. **Configure environment**  
+   - Create a `.env` file:  
      ```bash
      echo "DUCKDB_API_KEY=your-secret-key" > .env
      echo "DB_FILE=test.db" >> .env
      ```
-   - **Option B**: Export directly in your shell:  
+   - Or export directly:  
      ```bash
      export DUCKDB_API_KEY="your-secret-key"
      export DB_FILE="test.db"
@@ -66,15 +79,13 @@ Place all your DuckDB `.db` files in the project root (next to `app.py`).
 
 ### Running the Flask API
 
-- **Development server** (auto-reload; not for production):
+- **Development server**:
   ```bash
   python app.py
   ```
-  Listens on `0.0.0.0:8000`.
-
-- **Production server** with Gunicorn:
+- **Production with Gunicorn**:
   ```bash
-  gunicorn app:app     --workers 4     --threads 2     --bind 0.0.0.0:8000
+  gunicorn app:app --workers 4 --threads 2 --bind 0.0.0.0:8000
   ```
 
 ## API Reference
@@ -84,8 +95,7 @@ Place all your DuckDB `.db` files in the project root (next to `app.py`).
 ```
 GET /health
 ```
-
-**Response**  
+Response:
 ```json
 {"status":"ok"}
 ```
@@ -96,18 +106,18 @@ GET /health
 POST /query
 ```
 
-**Headers**  
+Headers:
 ```
 X-API-Key: <your-secret-key>
 Content-Type: application/json
 ```
 
-**Body**  
+Body:
 ```json
-{ "sql": "SELECT * FROM catalog.schema.table LIMIT 10" }
+{ "sql": "SELECT * FROM schema.table LIMIT 10" }
 ```
 
-**Response**  
+Response:
 ```json
 {
   "rowcount": 2,
@@ -123,33 +133,42 @@ Content-Type: application/json
 
 1. **Build** the image  
    ```bash
-   docker build -t duckdb-api .
+   docker build -t duckdb-http-api .
    ```
-2. **Create** a `.env` file at the project root (if you haven’t already):  
+2. **Create** a `.env` file:
    ```ini
-   DUCKDB_API_KEY=your-super-secret-key
+   DUCKDB_API_KEY=your-secret-key
    DB_FILE=test.db
    ```
-3. **Run** the container, **mounting** your `.db` files as volumes:  
+3. **Run** the container, mounting your DB files:
    ```bash
-   docker run -d      -p 8000:8000      --env-file .env      -v "$(pwd)/test.db:/app/test.db"      --name duckdb-api      duckdb-api
+   docker run -d \
+     -p 8000:8000 \
+     --env-file .env \
+     -v "$(pwd)/test.db:/app/test.db" \
+     -v "$(pwd)/analytics.db:/app/analytics.db" \
+     --name duckdb-http-api \
+     duckdb-http-api
    ```
 4. **Verify**  
    ```bash
-   curl -H "X-API-Key: your-super-secret-key" http://localhost:8000/health
+   curl -H "X-API-Key: your-secret-key" http://localhost:8000/health
    ```
 
 ## Docker Compose (Optional)
 
 ```yaml
-version: "3.8"
+version: '3.8'
 services:
   api:
     build: .
     ports:
-      - "8000:8000"
+      - '8000:8000'
     env_file:
       - .env
+    volumes:
+      - ./test.db:/app/test.db
+      - ./analytics.db:/app/analytics.db
 ```
 
 ```bash

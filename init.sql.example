@@ -1,0 +1,5 @@
+INSTALL ducklake;
+
+ATTACH 'ducklake:ducklake.ducklake';
+
+ATTACH 'tpch.db'

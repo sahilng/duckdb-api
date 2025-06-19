@@ -28,27 +28,6 @@ def get_db():
         if init_path.exists():
             g.db.execute(init_path.read_text())
 
-        # If any .ducklake files exist, install & load the extension
-        if any(Path(".").glob("*.ducklake")):
-            g.db.execute("INSTALL ducklake;")
-            g.db.execute("LOAD ducklake;")
-        
-        # Attach all .db and .duckdb files
-        for ext in ("*.db", "*.duckdb"):
-            for db_path in Path(".").glob(ext):
-                fname = db_path.name
-                alias = db_path.stem
-                if fname == DB_FILE:
-                    continue
-                g.db.execute(f"ATTACH '{fname}' AS {alias}")
-
-        # Attach all .ducklake files under the ducklake: URI scheme and switch to each
-        for db_path in Path(".").glob("*.ducklake"):
-            fname = db_path.name
-            alias = db_path.stem
-            # e.g. metadata.ducklake → ATTACH 'ducklake:metadata.ducklake' AS metadata
-            g.db.execute(f"ATTACH 'ducklake:{fname}' AS {alias}")
-
     return g.db
 
 @app.teardown_appcontext

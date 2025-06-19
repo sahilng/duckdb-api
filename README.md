@@ -40,8 +40,6 @@ Example `init.sql`:
 INSTALL ducklake;
 
 ATTACH 'ducklake:ducklake.ducklake';
-
-ATTACH 'tpch.db'
 ```
 
 ## Local Development
@@ -142,7 +140,6 @@ Response:
      -p 8000:8000 \
      --env-file .env \
      -v "$(pwd)/test.db:/app/test.db" \
-     -v "$(pwd)/analytics.db:/app/analytics.db" \
      --name duckdb-http-api \
      duckdb-http-api
    ```

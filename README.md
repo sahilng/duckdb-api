@@ -37,15 +37,11 @@ Use this to maintain any `ATTACH` statements for `.db`, `.duckdb`, or `.ducklake
 Example `init.sql`:
 
 ```sql
--- Install and load DuckLake extension if needed
 INSTALL ducklake;
-LOAD ducklake;
 
--- Attach additional databases under desired aliases
-ATTACH 'analytics.db' AS analytics;
-ATTACH 'users.duckdb' AS users;
-ATTACH 'ducklake:metadata.ducklake' AS metadata;
-USE metadata;
+ATTACH 'ducklake:ducklake.ducklake';
+
+ATTACH 'tpch.db'
 ```
 
 ## Local Development

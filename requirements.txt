@@ -1,0 +1,4 @@
+flask
+duckdb
+gunicorn
+python-dotenv

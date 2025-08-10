@@ -1,6 +1,6 @@
 # DuckDB SQL API
 
-A simple SQL API backed by DuckDB.
+A simple SQL HTTP API backed by DuckDB.
 
 ## Repository Structure
 
